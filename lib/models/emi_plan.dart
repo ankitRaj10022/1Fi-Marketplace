@@ -9,7 +9,7 @@ class EmiPlan {
     required this.id,
     required this.tenureMonths,
     required this.monthlyEmi,
-    this.interestRate = 0.0, // For NO-COST EMI
+    this.interestRate = 0.0,
     this.processingFee = 0.0,
   });
 

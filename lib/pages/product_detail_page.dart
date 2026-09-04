@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../models/emi_plan.dart';
-import '../services/mock_api_service.dart';
 import '../theme/app_theme.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -14,29 +13,15 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  final MockApiService _apiService = MockApiService();
+  String? _selectedVariant;
   
-  // Track selected variant ID per category (e.g., 'Storage': 'v1', 'Color': 'v3')
-  final Map<String, String> _selectedVariants = {};
-  
-  double get _currentPrice {
-    double price = widget.product.basePrice;
-    for (var variant in widget.product.variants) {
-      if (_selectedVariants[variant.name] == variant.id) {
-        price += variant.additionalPrice;
-      }
-    }
-    return price;
-  }
+  double get _currentPrice => widget.product.basePrice;
 
   @override
   void initState() {
     super.initState();
-    // Auto-select first variant in each category
-    final categories = widget.product.variants.map((e) => e.name).toSet();
-    for (var category in categories) {
-      final firstVariant = widget.product.variants.firstWhere((v) => v.name == category);
-      _selectedVariants[category] = firstVariant.id;
+    if (widget.product.variants.isNotEmpty) {
+      _selectedVariant = widget.product.variants.first;
     }
   }
 
@@ -47,8 +32,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return EmiSelectionSheet(
-          productPrice: _currentPrice,
-          apiService: _apiService,
+          emiPlans: widget.product.emiPlans,
         );
       },
     );
@@ -56,8 +40,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = widget.product.variants.map((e) => e.name).toSet();
-
     return Scaffold(
       backgroundColor: AppTheme.white,
       appBar: AppBar(
@@ -94,43 +76,42 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           color: AppTheme.primaryPurple,
                         ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.product.description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
-                  ),
+                  if (widget.product.description.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      'Description',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.product.description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5),
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   
-                  // Variants Selector
-                  for (var category in categories) ...[
+                  if (widget.product.variants.isNotEmpty) ...[
                     Text(
-                      category,
+                      'Variants',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
-                      children: widget.product.variants
-                          .where((v) => v.name == category)
-                          .map((variant) {
-                        final isSelected = _selectedVariants[category] == variant.id;
+                      children: widget.product.variants.map((variant) {
+                        final isSelected = _selectedVariant == variant;
                         return ChoiceChip(
-                          label: Text(variant.value),
+                          label: Text(variant),
                           selected: isSelected,
                           onSelected: (selected) {
                             if (selected) {
                               setState(() {
-                                _selectedVariants[category] = variant.id;
+                                _selectedVariant = variant;
                               });
                             }
                           },
-                          selectedColor: AppTheme.primaryPurple.withOpacity(0.1),
+                          selectedColor: AppTheme.primaryPurple.withValues(alpha: 0.1),
                           labelStyle: TextStyle(
                             color: isSelected ? AppTheme.primaryPurple : AppTheme.darkNavy,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -158,7 +139,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           padding: const EdgeInsets.all(16),
           child: ElevatedButton(
             onPressed: () => _showEmiBottomSheet(context),
-            child: const Text('View EMI Plans'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryPurple,
+              foregroundColor: AppTheme.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('View EMI Plans', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ),
       ),
@@ -167,13 +156,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 }
 
 class EmiSelectionSheet extends StatefulWidget {
-  final double productPrice;
-  final MockApiService apiService;
+  final List<EmiPlan> emiPlans;
 
   const EmiSelectionSheet({
     super.key,
-    required this.productPrice,
-    required this.apiService,
+    required this.emiPlans,
   });
 
   @override
@@ -181,14 +168,7 @@ class EmiSelectionSheet extends StatefulWidget {
 }
 
 class _EmiSelectionSheetState extends State<EmiSelectionSheet> {
-  late Future<List<EmiPlan>> _emiPlansFuture;
   EmiPlan? _selectedPlan;
-
-  @override
-  void initState() {
-    super.initState();
-    _emiPlansFuture = widget.apiService.fetchEmiPlans(widget.productPrice);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,91 +203,79 @@ class _EmiSelectionSheetState extends State<EmiSelectionSheet> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<EmiPlan>>(
-              future: _emiPlansFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: AppTheme.primaryPurple));
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No EMI plans available.'));
-                }
-
-                final plans = snapshot.data!;
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: plans.length,
-                  itemBuilder: (context, index) {
-                    final plan = plans[index];
-                    final isSelected = _selectedPlan?.id == plan.id;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedPlan = plan;
-                        });
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: isSelected ? AppTheme.primaryPurple : Colors.transparent,
-                            width: 2,
+            child: widget.emiPlans.isEmpty
+                ? const Center(child: Text('No EMI plans available.'))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: widget.emiPlans.length,
+                    itemBuilder: (context, index) {
+                      final plan = widget.emiPlans[index];
+                      final isSelected = _selectedPlan?.id == plan.id;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedPlan = plan;
+                          });
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: isSelected ? AppTheme.primaryPurple : Colors.transparent,
+                              width: 2,
+                            ),
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Radio<EmiPlan>(
-                                value: plan,
-                                groupValue: _selectedPlan,
-                                activeColor: AppTheme.primaryPurple,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedPlan = value;
-                                  });
-                                },
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${plan.tenureMonths} Months',
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '₹${plan.monthlyEmi.toStringAsFixed(0)} / mo',
-                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                            color: AppTheme.primaryPurple,
-                                          ),
-                                    ),
-                                    if (plan.interestRate == 0)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 4),
-                                        child: Text(
-                                          'NO-COST EMI',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: Colors.green[700],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                      ),
-                                  ],
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Radio<EmiPlan>(
+                                  value: plan,
+                                  groupValue: _selectedPlan,
+                                  activeColor: AppTheme.primaryPurple,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedPlan = value;
+                                    });
+                                  },
                                 ),
-                              ),
-                            ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${plan.tenureMonths} Months',
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '₹${plan.monthlyEmi.toStringAsFixed(0)} / mo',
+                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                              color: AppTheme.primaryPurple,
+                                            ),
+                                      ),
+                                      if (plan.interestRate == 0)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            'NO-COST EMI',
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: Colors.green[700],
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                      );
+                    },
+                  ),
           ),
           Container(
             padding: const EdgeInsets.all(20),
@@ -328,20 +296,25 @@ class _EmiSelectionSheetState extends State<EmiSelectionSheet> {
                   onPressed: _selectedPlan == null
                       ? null
                       : () {
-                          // Proceed with plan CTA
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Selected ${_selectedPlan!.tenureMonths} Months Plan'),
+                              content: Text('Proceeding with ${_selectedPlan!.tenureMonths} Months Plan'),
                               backgroundColor: AppTheme.primaryPurple,
                             ),
                           );
-                          Navigator.pop(context); // Close sheet
+                          Navigator.pop(context);
                         },
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryPurple,
+                    foregroundColor: AppTheme.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     disabledBackgroundColor: Colors.grey[300],
                     disabledForegroundColor: Colors.grey[600],
                   ),
-                  child: Text('Proceed with Plan'),
+                  child: const Text('Proceed with Plan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),

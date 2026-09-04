@@ -10,7 +10,7 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
-  int _selectedIndex = 2; // Default to Marketplace
+  int _selectedIndex = 2;
 
   final List<String> _tabs = [
     'Top Brands',
@@ -30,7 +30,7 @@ class _ShopPageState extends State<ShopPage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1, // Assume Shop is selected in bottom nav
+        currentIndex: 1,
         selectedItemColor: AppTheme.primaryPurple,
         unselectedItemColor: AppTheme.greyText,
         showUnselectedLabels: true,
@@ -97,7 +97,7 @@ class _ShopPageState extends State<ShopPage> {
                     margin: const EdgeInsets.only(right: 12),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppTheme.white : Colors.white.withOpacity(0.2),
+                      color: isSelected ? AppTheme.white : Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

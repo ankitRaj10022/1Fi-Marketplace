@@ -17,7 +17,6 @@ class AppTheme {
         primary: primaryPurple,
         secondary: primaryPurple,
         surface: white,
-        background: lightGreyBg,
       ),
       textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.inter(color: darkNavy, fontWeight: FontWeight.bold),
@@ -56,10 +55,10 @@ class AppTheme {
           ),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: white,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

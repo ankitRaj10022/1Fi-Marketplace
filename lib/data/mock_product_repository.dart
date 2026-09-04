@@ -6,7 +6,7 @@ import 'product_repository.dart';
 class MockProductRepository implements ProductRepository {
   @override
   Future<List<Product>> fetchProducts() async {
-    await Future.delayed(const Duration(milliseconds: 800)); // Simulating network latency
+    await Future.delayed(const Duration(milliseconds: 800));
     final jsonString = await rootBundle.loadString('assets/data/products.json');
     final List<dynamic> data = json.decode(jsonString);
     return data.map((e) => Product.fromJson(e)).toList();

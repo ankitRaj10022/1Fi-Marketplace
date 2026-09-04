@@ -57,20 +57,27 @@ class _ShopPageState extends State<ShopPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Shop',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppTheme.white,
-                    ),
+          Text(
+            'Shop',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppTheme.white,
+                ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.white,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: const TextField(
+              decoration: InputDecoration(
+                icon: Icon(Icons.search, color: AppTheme.greyText),
+                hintText: 'Search products, brands...',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: AppTheme.greyText),
               ),
-              IconButton(
-                icon: const Icon(Icons.search, color: AppTheme.white),
-                onPressed: () {},
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 16),
           Text(

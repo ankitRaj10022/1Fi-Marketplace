@@ -13,5 +13,13 @@ class EmiPlan {
     this.processingFee = 0.0,
   });
 
+  factory EmiPlan.fromJson(Map<String, dynamic> json) {
+    return EmiPlan(
+      id: json['id'],
+      tenureMonths: json['tenureMonths'],
+      monthlyEmi: (json['monthlyEmi'] as num).toDouble(),
+    );
+  }
+
   double get totalPayable => (monthlyEmi * tenureMonths) + processingFee;
 }

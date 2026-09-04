@@ -1,0 +1,53 @@
+[
+  {
+    "id": "p1",
+    "name": "Sony WH-1000XM5 Wireless Headphones",
+    "imageUrl": "https://m.media-amazon.com/images/I/51aXvjzcukL._SX522_.jpg",
+    "basePrice": 29990.0,
+    "variants": ["Black", "Silver", "Midnight Blue"],
+    "emiPlans": [
+      { "id": "emi_3", "tenureMonths": 3, "monthlyEmi": 9996.67 },
+      { "id": "emi_6", "tenureMonths": 6, "monthlyEmi": 4998.33 },
+      { "id": "emi_9", "tenureMonths": 9, "monthlyEmi": 3332.22 },
+      { "id": "emi_12", "tenureMonths": 12, "monthlyEmi": 2499.17 }
+    ]
+  },
+  {
+    "id": "p2",
+    "name": "Apple iPhone 15 (128 GB)",
+    "imageUrl": "https://m.media-amazon.com/images/I/71d7rfSl0wL._SX679_.jpg",
+    "basePrice": 79900.0,
+    "variants": ["Black", "Blue", "Green", "Yellow", "Pink"],
+    "emiPlans": [
+      { "id": "emi_3", "tenureMonths": 3, "monthlyEmi": 26633.33 },
+      { "id": "emi_6", "tenureMonths": 6, "monthlyEmi": 13316.67 },
+      { "id": "emi_9", "tenureMonths": 9, "monthlyEmi": 8877.78 },
+      { "id": "emi_12", "tenureMonths": 12, "monthlyEmi": 6658.33 }
+    ]
+  },
+  {
+    "id": "p3",
+    "name": "Samsung Galaxy Watch 6",
+    "imageUrl": "https://m.media-amazon.com/images/I/61FptwE9uVL._SX679_.jpg",
+    "basePrice": 29999.0,
+    "variants": ["Graphite", "Gold", "Silver"],
+    "emiPlans": [
+      { "id": "emi_3", "tenureMonths": 3, "monthlyEmi": 9999.67 },
+      { "id": "emi_6", "tenureMonths": 6, "monthlyEmi": 4999.83 },
+      { "id": "emi_9", "tenureMonths": 9, "monthlyEmi": 3333.22 }
+    ]
+  },
+  {
+    "id": "p4",
+    "name": "Dyson V12 Detect Slim Absolute",
+    "imageUrl": "https://m.media-amazon.com/images/I/51Bqj9T7KFL._SX679_.jpg",
+    "basePrice": 55900.0,
+    "variants": ["Yellow/Nickel"],
+    "emiPlans": [
+      { "id": "emi_3", "tenureMonths": 3, "monthlyEmi": 18633.33 },
+      { "id": "emi_6", "tenureMonths": 6, "monthlyEmi": 9316.67 },
+      { "id": "emi_12", "tenureMonths": 12, "monthlyEmi": 4658.33 },
+      { "id": "emi_24", "tenureMonths": 24, "monthlyEmi": 2329.17 }
+    ]
+  }
+]

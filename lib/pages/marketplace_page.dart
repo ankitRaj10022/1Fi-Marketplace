@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
-import '../services/mock_api_service.dart';
+import '../data/product_repository.dart';
 import '../theme/app_theme.dart';
 import 'product_detail_page.dart';
 
@@ -12,13 +13,12 @@ class MarketplacePage extends StatefulWidget {
 }
 
 class _MarketplacePageState extends State<MarketplacePage> {
-  final MockApiService _apiService = MockApiService();
   late Future<List<Product>> _productsFuture;
 
   @override
   void initState() {
     super.initState();
-    _productsFuture = _apiService.fetchProducts();
+    _productsFuture = context.read<ProductRepository>().fetchProducts();
   }
 
   @override
